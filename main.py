@@ -1,34 +1,28 @@
-from pathlib import Path
-
-def collect_player_ids(file_line_content):
-    character_ids = []
-    for line in file_line_content:
-        if "COMBATANT_INFO" in line:
-            id = line.split(",")[1]
-            if id not in character_ids:
-                character_ids.append(id)
-    return character_ids
-
-def collect_character_names(file_line_content, character_ids):
-    character_names = []
-    for id in character_ids:
-        for line in file_line_content:
-            if "SPELL_AURA_APPLIED" in line and id in line and "Player" in line.split(",")[1]:
-                name = line.split(",")[2].strip("\"\"")
-                if name not in character_names:
-                    character_names.append(name)
-    return character_names
+from wclogsapi import get_character_list
+from spreadsheetsapi import execute
+import json
 
 def main():
-    test = []
-    path = Path(input(f"Log path: "))
+    #test = []
+    #path = Path(input(f"Log path: "))
     #path.replace("\\", "/")
-    with open(path.as_posix().strip("\"\"")) as logfile:
-        lines = logfile.readlines()
-        character_ids = collect_player_ids(lines)
-        character_names = collect_character_names(lines, character_ids)
-        test = character_names
-    for x in test:
-        print(x)
+    #with open(path.as_posix().strip("\"\"")) as logfile:
+    #    lines = logfile.readlines()
+    #    character_ids = collect_player_ids(lines)
+    #    character_names = collect_character_names(lines, character_ids)
+    #    test = character_names
+    #for x in test:
+    #    print(x)
+    character_list = get_character_list()
+    with open("playersCharacters2.json", "r+", encoding="utf-8") as json_file:
+        character_to_player = json.load(json_file)
+        attended_player_list = [character_to_player.get(character) for character in character_list if character_to_player.get(character) is not None]
+    for player in attended_player_list:
+        execute(player)
 
-main()
+
+
+
+
+if __name__ == "__main__":
+    main()
